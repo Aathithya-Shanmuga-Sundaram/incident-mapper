@@ -215,23 +215,12 @@ def build_graph_from_intake(structured, freeform_lines):
     for i in range(len(stmt_nodes)-1):
         add_edge(G, stmt_nodes[i], stmt_nodes[i+1], evidence="story_sequence")
 
-    # Shared entities linking
-    entity_map = defaultdict(list)
-    for stmt in stmt_nodes:
-        neighbors = [nbr for nbr in G.neighbors(stmt) if G.nodes[nbr].get('type') != 'statement']
-        for ent in neighbors:
-            entity_map[ent].append(stmt)
-    for ent, stmts in entity_map.items():
-        if len(stmts) > 1:
-            for i in range(len(stmts)-1):
-                add_edge(G, stmts[i], stmts[i+1], evidence=f"shared_entity:{G.nodes[ent]['type']}")
-
     return G, parse_trace
 
 # ---------------- export ----------------
 def export_graph_tables(G):
-    nodes = [{'node_id':n, 'label':d.get('label',''), 'type':d.get('type',''), 'value':d.get('value',''), 'confidence':d.get('confidence','')} for n,d in G.nodes(data=True)]
-    edges = [{'src':a, 'dst':b, 'weight':d.get('weight',1), 'evidence':d.get('evidence_list',[])} for a,b,d in G.edges(data=True)]
+    nodes = [{'node_id': n, 'label': d.get('label',''), 'type': d.get('type',''), 'value': d.get('value',''), 'confidence': d.get('confidence','')} for n,d in G.nodes(data=True)]
+    edges = [{'src': a, 'dst': b, 'weight': d.get('weight',1), 'evidence': d.get('evidence_list',[])} for a,b,d in G.edges(data=True)]
     pd.DataFrame(nodes).to_csv('nodes.csv', index=False)
     pd.DataFrame(edges).to_csv('edges.csv', index=False)
 
@@ -242,38 +231,35 @@ def export_iocs(G):
             deg = G.degree(n)
             ts_neighbors = sum(1 for nbr in G.neighbors(n) if G.nodes[nbr].get('type')=='timestamp')
             score = deg + ts_neighbors
-            iocs.append({'node_id':n, 'type':d.get('type'), 'value':d.get('value'),'score':score,'label':d.get('label')})
-    df = pd.DataFrame(sorted(iocs, key=lambda x: x['score'], reverse=True)) if iocs else pd.DataFrame([], columns=['node_id','type','value','score','label'])
+            iocs.append({'node_id': n, 'type': d.get('type'), 'value': d.get('value'), 'score': score, 'label': d.get('label')})
+    if iocs:
+        df = pd.DataFrame(sorted(iocs, key=lambda x: x['score'], reverse=True))
+    else:
+        df = pd.DataFrame([], columns=['node_id','type','value','score','label'])
     df.to_csv('iocs.csv', index=False)
 
 def export_parse_trace(parse_trace):
-    with open('parse_output.txt','w', encoding='utf-8') as f:
+    with open('parse_output.txt', 'w', encoding='utf-8') as f:
         for t in parse_trace:
             f.write(f"Line {t['line_no']} (conf={t['confidence']}): {t['raw']}\n")
             for etype, vals in t['entities'].items():
                 if vals:
-                    f.write(f"  {etype.upper():10s}: {', '.join(map(str,vals))}\n")
+                    f.write(f"  {etype.upper():10s}: {', '.join(map(str, vals))}\n")
             f.write("\n")
 
-# ---------------- matplotlib visualization ----------------
+# ---------------- matplotlib setup ----------------
+import matplotlib
+if 'idlelib' in sys.modules:
+    # IDLE interactive
+    matplotlib.use("TkAgg")
+else:
+    # Terminal / headless
+    matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
 def visualize_matplotlib(G, filename='incident_graph.png'):
-    import matplotlib
-    # Backend selection
-    if 'idlelib' in sys.modules:
-        matplotlib.use("TkAgg")
-    else:
-        try:
-            matplotlib.use("Qt5Agg")
-        except:
-            matplotlib.use("Agg")
-
-    import matplotlib.pyplot as plt
-    plt.figure(figsize=(18,14), dpi=150)
-
-    # Spring layout with fixed floats
-    pos = nx.spring_layout(G, k=1.2, iterations=150, seed=42)
-    pos = {n:(float(x), float(y)) for n,(x,y) in pos.items()}
-
+    plt.figure(figsize=(15,12))
+    pos = nx.spring_layout(G, k=0.5, seed=42)
     color_map = {
         'statement':'#ffd1a9',
         'ip':'#ff9999',
@@ -286,26 +272,28 @@ def visualize_matplotlib(G, filename='incident_graph.png'):
         'vuln':'#ffb3e6'
     }
 
-    node_colors = [color_map.get(d.get('type','statement'),'#cccccc') for n,d in G.nodes(data=True)]
-    node_sizes = [1200 + 200*G.degree(n) for n in G.nodes()]
+    node_colors = []
+    node_sizes = []
+    for n,d in G.nodes(data=True):
+        ntype = d.get('type','statement')
+        node_colors.append(color_map.get(ntype,'#cccccc'))
+        node_sizes.append(1200 + 200*G.degree(n))  # larger if more connections
+
     labels = {n:(d.get('label')[:20]+'...' if len(d.get('label',''))>20 else d.get('label','')) for n,d in G.nodes(data=True)}
 
     nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=node_sizes, alpha=0.9)
-    nx.draw_networkx_edges(G, pos, width=1.5, alpha=0.7)
-    nx.draw_networkx_labels(G, pos, labels, font_size=10)
-
-    plt.title("Incident Mapping Graph (Storytelling Mode)", fontsize=16)
+    nx.draw_networkx_edges(G, pos, width=1, alpha=0.7)
+    nx.draw_networkx_labels(G, pos, labels, font_size=9)
+    plt.title("Incident Mapping Graph", fontsize=16)
     plt.axis('off')
-    plt.savefig(filename, dpi=300, bbox_inches='tight')
-    try:
+    plt.tight_layout()
+    plt.savefig(filename, dpi=300)
+    if 'idlelib' in sys.modules:
         plt.show()
-    except Exception:
-        print(f"Graph saved to {filename}. Unable to display interactively.")
     print(f"Graph visualization saved to {filename}")
 
-# ---------------- main ----------------
-def main():
-    print(r"""
+# ---------------- banner ----------------
+print(r"""
 $$$$$$\                     $$\       $$\                      $$\           $$\      $$\                                                   
 \_$$  _|                    \__|      $$ |                     $$ |          $$$\    $$$ |                                                  
   $$ |  $$$$$$$\   $$$$$$$\ $$\  $$$$$$$ | $$$$$$\  $$$$$$$\ $$$$$$\         $$$$\  $$$$ | $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\  
@@ -315,28 +303,35 @@ $$$$$$\                     $$\       $$\                      $$\           $$\
 $$$$$$\ $$ |  $$ |\$$$$$$$\ $$ |\$$$$$$$ |\$$$$$$$\ $$ |  $$ | \$$$$  |      $$ | \_/ $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |      
 \______|\__|  \__| \_______|\__| \_______| \_______|\__|  \__|  \____/       \__|     \__| \_______|$$  ____/ $$  ____/  \_______|\__|      
                                                                                                     $$ |      $$ |                          
-                                                                                                   |         |                          
+                                                                                                    $$ |      $$ |                          
                                                                                                     \__|      \__|                          
-    Developed by Aathithya Shanmuga Sundaram
-    """)
+                      Incident Mapper
+       Developed by Aathithya Shanmuga Sundaram
+""")
+
+# ---------------- main ----------------
+def main():
     structured = intake_structured()
     print("\n=== Now paste free-form incident statements (one per line). Blank line to finish. ===")
-    free_lines=[]
-    count=1
+    free_lines = []
+    count = 1
     while True:
         ln = input(f"free-{count:02d}> ").strip()
-        if ln=="": break
+        if ln == "":
+            break
         free_lines.append(ln)
-        count+=1
+        count += 1
 
     G, parse_trace = build_graph_from_intake(structured, free_lines)
+
     print("Exporting CSVs and parse trace...")
     export_graph_tables(G)
     export_iocs(G)
     export_parse_trace(parse_trace)
     print("nodes.csv, edges.csv, iocs.csv, parse_output.txt written.")
+
     print("Visualizing graph...")
     visualize_matplotlib(G)
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()
