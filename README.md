@@ -57,7 +57,7 @@ pip install networkx pandas python-dateutil matplotlib
 Run the script:
 
 ```bash
-python interactive_incident_mapper.py
+python app.py
 ```
 
 **Steps:**
