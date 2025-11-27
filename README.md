@@ -1,70 +1,93 @@
+# BlackSpine
+
 ## Overview
 
-**ConnectIR** is a specialized Streamlit application built for **Security Analysts** and **Incident Responders**. It solves the challenge of analyzing fragmented incident data by transforming unstructured, free-form notes, log lines, and structured Indicators of Compromise (IoCs) into a dynamic, visual **Knowledge Graph** of entities.
+**BlackSpine** is a precision‑engineered Streamlit platform built for **Security Analysts**, **Threat Hunters**, and **Incident Responders** who refuse to operate blindly. It cuts through fragmented evidence, scattered logs, and free‑form notes by converting them into a structured, visual **Incident Intelligence Graph**.
 
-This tool helps responders instantly map the relationships between disparate pieces of evidence (IPs, Hashes, Users, Files, Timestamps), providing a **cohesive timeline and context** that is often impossible to derive from raw data or traditional spreadsheets alone.
+BlackSpine exposes the hidden backbone of an incident — the relationships, timelines, pivots, and dependencies that are usually buried inside disconnected text. It reveals what actually holds the incident together, giving responders an immediate strategic view that ordinary tools never surface.
 
 ---
 
 ## ✨ Key Features
 
-* **Dynamic Entity Extraction:** Automatically parses and normalizes common security entities (IPs, Hashes, URLs, Timestamps, Users, Files) from any text input using sophisticated Regular Expressions.
-* **Intelligent Graph Generation:** Uses **NetworkX** to build a comprehensive graph where nodes represent entities and edges establish connections based on co-occurrence in the evidence or narrative flow.
-* **Stable Visualization (Plotly):** Renders a stable, zoomable, and interactive force-directed graph with visible node labels using **Plotly**, enhancing exploratory data analysis.
-* **IOC Prioritization:** Generates a separate, downloadable list of key Indicators of Compromise, dynamically **scored by their connectivity** within the incident to highlight the most pivotal pieces of evidence.
-* **Streamlit Interface:** Provides an intuitive, easy-to-use, browser-based graphical interface for rapid deployment and analysis.
+* **Adaptive Entity Extraction:** Identifies and normalizes IPs, domains, hashes, URLs, files, usernames, timestamps, and more using robust pattern logic.
+* **Context‑Driven Graph Construction:** Builds a dynamic, interconnected graph with **NetworkX**, linking entities based on real co‑occurrence and narrative relevance.
+* **High‑Stability Visualization:** Uses **Plotly** to render a smooth, interactive, zoom‑ready force graph with clearly visible node labels.
+* **IOC Influence Ranking:** Generates a downloadable list of Indicators of Compromise, automatically ranked by structural importance (graph degree + relational weight).
+* **Streamlined IR Interface:** A clean, rapid, browser‑native workflow designed specifically for real‑world analyst pressure.
 
 ---
 
 ## 🚀 Installation and Setup
 
-This application requires Python 3.8 or higher.
+Python **3.8+** is required.
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Aathithya-Shanmuga-Sundaram/incident-mapper.git
-cd incident-mapper
+git clone https://github.com/Aathithya-Shanmuga-Sundaram/BlackSpine.git
+cd BlackSpine
 ```
 
 ### 2. Install Dependencies
-
-All necessary libraries are listed in requirements.txt.
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Run the Application
-
-Start the Streamlit server from the project directory.
+### 3. Launch BlackSpine
 
 ```bash
 streamlit run app.py
 ```
 
-The ConnectIR application will automatically open in your default web browser (typically at [http://localhost:8501](http://localhost:8501)).
+The interface opens automatically (generally at [http://localhost:8501](http://localhost:8501)).
 
 ---
 
 ## 💻 Usage Guide
 
-**Structured Input (Sidebar):** Use the left sidebar to input high-certainty indicators like the main attack time, compromised hosts, and known malware hashes.
+### Structured Inputs (Sidebar)
 
-**Free-form Input (Main Area):** Paste raw log lines, timeline narrative statements, or contextual notes into the large text box. The application processes and extracts entities from each line independently.
+Feed in reliable, high‑confidence indicators such as:
 
-**Visualization:** The graph in the main area updates instantly as you input data, visually mapping the relationships and flow between the entities you enter.
+* Primary attack timestamps
+* Compromised assets
+* Verified malware hashes
 
-### Analyze Tabs:
+### Free‑Form Inputs (Main Panel)
 
-**Interactive Graph:** Visualize the network of connections. Use the Plotly controls to zoom, pan, and hover over nodes for detailed information and context.
+Paste:
 
-**Extracted IoCs:** View and download a prioritized CSV list of Indicators (IPs, Hashes, URLs) ranked by their degree of connection within the incident.
+* Log fragments
+* Narrative notes
+* Analyst observations
+* Timelines
 
-**Parse Trace:** Review a detailed log of every line processed and the specific entities successfully extracted, along with the calculated confidence score.
+BlackSpine extracts entities line‑by‑line and injects them into the graph.
+
+### Visualization
+
+The graph updates instantly, exposing:
+
+* Hidden relationships
+* Lateral pivots
+* Contextual clusters
+* Temporal patterns
+
+### Analysis Tabs
+
+**Interactive Graph:**
+Explore the full relational map. Zoom, hover, and pan to inspect nodes and edges.
+
+**Extracted IoCs:**
+Download a ranked CSV of IPs, hashes, and URLs sorted by their structural importance.
+
+**Parse Trace:**
+Review a granular log of how each line was interpreted and which entities were successfully extracted.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome!
+Suggestions, enhancements, and pull requests are always welcome. BlackSpine grows stronger with every contributor who sharpens its spine.
