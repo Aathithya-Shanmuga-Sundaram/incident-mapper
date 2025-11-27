@@ -40,6 +40,10 @@ pip install -r requirements.txt
 ```bash
 streamlit run app.py
 ```
+Or
+```bash
+python.exe -m streamlit run app.py
+```
 
 The interface opens automatically (generally at [http://localhost:8501](http://localhost:8501)).
 
