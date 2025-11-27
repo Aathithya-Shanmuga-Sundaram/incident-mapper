@@ -6,14 +6,14 @@ import networkx as nx
 import pandas as pd
 from io import BytesIO
 import streamlit.components.v1 as components
-from pyvis.network import Network 
-import os 
-import matplotlib.pyplot as plt 
-import plotly.graph_objects as go 
+from pyvis.network import Network
+import os
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 # --- Configuration & Styling ---
 st.set_page_config(
-    page_title="Interactive Incident Mapper",
+    page_title="BlackSpine: Incident Knowledge Mapper",  
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -222,8 +222,8 @@ def visualize_plotly(G):
 
     # --- 1. Map Node Attributes and Calculate Layout ---
     color_map = {
-        'statement': '#F0F8FF', 'ip': '#FF4B4B', 'hash': '#4ECDC4',       
-        'url': '#FFC300', 'host': '#4682B4', 'user': '#8A2BE2',       
+        'statement': '#F0F8FF', 'ip': '#FF4B4B', 'hash': '#4ECDC4',         
+        'url': '#FFC300', 'host': '#4682B4', 'user': '#8A2BE2',         
         'file': '#3CB371', 'timestamp': '#FF69B4', 'vuln': '#FF8C00'
     }
     
@@ -295,7 +295,7 @@ def visualize_plotly(G):
                 layout=go.Layout(
                     # Correct structure for title font size
                     title=dict(
-                        text='<br>Interactive Incident Entity Graph (Plotly)',
+                        text='<br>BlackSpine Incident Entity Graph (Plotly)',  
                         font=dict(size=16)
                     ),
                     showlegend=False,
@@ -318,7 +318,7 @@ def visualize_plotly(G):
 # ---------------- STREAMLIT UI LAYOUT ----------------
 
 def main_app():
-    st.title("🛡️Interactive Incident Mapper")
+    st.title("🛡BlackSpine: Incident Knowledge Mapper")  
     st.markdown("Map your incident response data into a visual graph of entities and events. **The map updates automatically after every input change.**")
 
     # --- Sidebar Input ---
@@ -371,6 +371,9 @@ def main_app():
     
     if not (time_input or compromised_hosts or free_form_input or additional_notes):
         st.info("Start entering data in the sidebar or free-form area to generate the map dynamically.")
+
+        st.markdown("---")
+        st.markdown("<p style='text-align: center; color: gray;'>Developed by Aathithya Shanmuga Sundaram #MakeEveryoneCyberSafe</p>", unsafe_allow_html=True)  
         return
 
     with st.spinner("Updating Knowledge Graph and Visualization..."):
@@ -419,7 +422,7 @@ def main_app():
             
             trace_data = []
             for t in parse_trace:
-                entities_str = "\n".join([f"  - **{k.upper()}**: {', '.join(map(str, v))}" for k, v in t['entities'].items() if v])
+                entities_str = "\n".join([f"  - **{k.upper()}**: {', '.join(map(str, v))}" for k, v in t['entities'].items() if v])
                 trace_data.append({
                     'Line ID': t['line_no'],
                     'Confidence': f"{t['confidence']:.1f}",
@@ -432,7 +435,7 @@ def main_app():
             else:
                 st.info("No entities were extracted from the free-form input.")
     st.markdown("---")
-    st.markdown("<p style='text-align: center; color: gray;'>Developed by Aathithya Shanmuga Sundaram #MakeEveryoneCyberSafe</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: gray;'>Developed by Aathithya Shanmuga Sundaram #MakeEveryoneCyberSafe</p>", unsafe_allow_html=True)  
 
 if __name__ == '__main__':
     main_app()
